@@ -26,6 +26,7 @@ struct Bohater
     int status;
 };
 
+
 struct Bohater bohaterowie[1000];
 int iloscB = 0;
 
@@ -78,17 +79,16 @@ int Wczytaj(int odN, int doN, char wiadomosc[]){
         }
     }
 }
-//dodać opisy liczb
 void Rejestruj(){
     while (getchar() != '\n');
     struct Bohater bohater;
     printf("Podaj imie\n");
     fgets(bohater.imie, sizeof(bohater.imie), stdin);
-    bohater.rasa = Wczytaj(1, 4, "Podaj rase 1-4\n") - 1;
-    bohater.klasa = Wczytaj(1, 6, "Podaj klase 1-6\n") - 1;
-    bohater.poziom = Wczytaj(1, 10000, "Podaj poziom\n");
+    bohater.rasa = Wczytaj(1, 4, "Podaj rase 1-4   1(czlowiek) 2(elf) 3(krasnolud) 4(ork)\n") - 1;
+    bohater.klasa = Wczytaj(1, 6, "Podaj klase 1-6   1(wojownik) 2(mag) 3(kaplan) 4(lotrzyk) 5(lowca) 6(druid)\n") - 1;
+    bohater.poziom = Wczytaj(1, 99999, "Podaj poziom\n");
     bohater.reputacja = Wczytaj(0, 100, "Podaj reputacje 0-100\n");
-    bohater.status = Wczytaj(1, 5, "Podaj status 1-5\n") - 1;
+    bohater.status = Wczytaj(1, 5, "Podaj status 1-5   1(aktywny) 2(na misji) 3(ranny) 4(zagniniony) 5(zawieszony)\n") - 1;
     bohaterowie[iloscB] = bohater;
     iloscB++;
 }
