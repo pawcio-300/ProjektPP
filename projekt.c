@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 void Rejestruj();
 void Wyszukaj();
@@ -8,7 +9,8 @@ void Sortuj();
 void Usun();
 void Zapisz();
 void Odczytaj();
-void Wyswietl(int index);
+void Wyswietl();
+void WyswietlWszystko();
 int Wczytaj(int odN, int doN, char wiadomosc[]);
 
 
@@ -16,7 +18,7 @@ const char* rasa[] = {"czlowiek", "elf", "krasnolud", "ork"};
 const char* klasa[] = {"wojownik", "mag", "kaplan", "lotrzyk", "lowca", "druid"};
 const char* status[] = {"aktywny", "na misji", "ranny", "zagniniony", "zawieszony"};
 
-struct Bohater
+typedef struct Bohater
 {
     char imie[100];
     int rasa;
@@ -24,17 +26,17 @@ struct Bohater
     int poziom;
     int reputacja;
     int status;
-};
+    struct Bohater* next;
+} Bohater;
+Bohater* head = NULL;
 
-
-struct Bohater bohaterowie[1000];
 int iloscB = 0;
 
 int main(){
     int menu;
     while (1)
     {
-        printf("Menu glowne:\n"
+        printf("\nMenu glowne:\n"
                "1. Rejestruj nowego bohatera\n"
                "2. Wyszukaj bohatera\n");
         if( scanf("%d", &menu) != 1 || menu < 1 || menu > 2) {
@@ -46,7 +48,7 @@ int main(){
         {
             case 1:
                 Rejestruj();
-                Wyswietl(0);
+                WyswietlWszystko();
                 break;
             case 2:
                 Wyszukaj();
@@ -59,8 +61,17 @@ int main(){
     // Wyszukaj();
     return 0;
 }
-void Wyswietl(int index){
-    printf("\nImie: %sRasa: %s\nKlasa: %s\nPoziom: %d\nReputacja: %d\nStatus: %s\n",bohaterowie[index].imie, rasa[bohaterowie[index].rasa], klasa[bohaterowie[index].klasa], bohaterowie[index].poziom, bohaterowie[index].reputacja, status[bohaterowie[index].status]);
+
+void Wyswietl(Bohater* bohater){
+    printf("\nImie: %sRasa: %s\nKlasa: %s\nPoziom: %d\nReputacja: %d\nStatus: %s\n",bohater->imie, rasa[bohater->rasa], klasa[bohater->klasa], bohater->poziom, bohater->reputacja, status[bohater->status]);
+}
+void WyswietlWszystko(){
+    Bohater* p;
+    p = head;
+    while (p != NULL) {
+        Wyswietl(p);
+        p = p->next;
+    }
 }
 int Wczytaj(int odN, int doN, char wiadomosc[]){
     int liczba;
@@ -81,15 +92,16 @@ int Wczytaj(int odN, int doN, char wiadomosc[]){
 }
 void Rejestruj(){
     while (getchar() != '\n');
-    struct Bohater bohater;
+    Bohater* bohater = calloc(1, sizeof(Bohater));
     printf("Podaj imie\n");
-    fgets(bohater.imie, sizeof(bohater.imie), stdin);
-    bohater.rasa = Wczytaj(1, 4, "Podaj rase 1-4   1(czlowiek) 2(elf) 3(krasnolud) 4(ork)\n") - 1;
-    bohater.klasa = Wczytaj(1, 6, "Podaj klase 1-6   1(wojownik) 2(mag) 3(kaplan) 4(lotrzyk) 5(lowca) 6(druid)\n") - 1;
-    bohater.poziom = Wczytaj(1, 99999, "Podaj poziom\n");
-    bohater.reputacja = Wczytaj(0, 100, "Podaj reputacje 0-100\n");
-    bohater.status = Wczytaj(1, 5, "Podaj status 1-5   1(aktywny) 2(na misji) 3(ranny) 4(zagniniony) 5(zawieszony)\n") - 1;
-    bohaterowie[iloscB] = bohater;
+    fgets(bohater->imie, sizeof(bohater->imie), stdin);
+    bohater->rasa = Wczytaj(1, 4, "Podaj rase 1-4   1(czlowiek) 2(elf) 3(krasnolud) 4(ork)\n") - 1;
+    bohater->klasa = Wczytaj(1, 6, "Podaj klase 1-6   1(wojownik) 2(mag) 3(kaplan) 4(lotrzyk) 5(lowca) 6(druid)\n") - 1;
+    bohater->poziom = Wczytaj(1, 99999, "Podaj poziom\n");
+    bohater->reputacja = Wczytaj(0, 100, "Podaj reputacje 0-100\n");
+    bohater->status = Wczytaj(1, 5, "Podaj status 1-5   1(aktywny) 2(na misji) 3(ranny) 4(zagniniony) 5(zawieszony)\n") - 1;
+    bohater->next = head;
+    head = bohater;
     iloscB++;
 }
 void Wyszukaj(){
@@ -104,10 +116,14 @@ void Wyszukaj(){
             printf("Podaj imie do wyszukania\n");
             getchar();
             fgets(imieSzukane, sizeof(imieSzukane), stdin);
-            for(int i=0; i < iloscB; i++){
-                if(strcmp(bohaterowie[i].imie, imieSzukane) == 0){
-                    Wyswietl(i);
+            
+            Bohater* p;
+            p = head;
+            while (p != NULL) {
+                if(strcmp(p->imie, imieSzukane) == 0){
+                    Wyswietl(p);
                 }
+                p = p->next;
             }
             break;
         }
@@ -115,10 +131,14 @@ void Wyszukaj(){
             int poziomSzukany;
             printf("Podaj poziom do wyszukania\n");
             scanf("%d", &poziomSzukany);
-            for(int i=0; i < iloscB; i++){
-                if(bohaterowie[i].poziom == poziomSzukany){
-                    Wyswietl(i);
+            
+            Bohater* p;
+            p = head;
+            while (p != NULL) {
+                if(p->poziom == poziomSzukany){
+                    Wyswietl(p);
                 }
+                p = p->next;
             }
             break;
         }
