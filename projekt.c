@@ -43,8 +43,10 @@ int main(){
         printf( "\nMenu glowne:\n"
                 "1. Rejestruj nowego bohatera\n"
                 "2. Wyszukaj bohatera\n"
-                "3. Wyswietl wszystkich bohaterow\n");
-        if( scanf("%d", &menu) != 1 || menu < 0 || menu > 3) {
+                "3. Wyswietl wszystkich bohaterow\n"
+                "4. Modyfikuj dane wybranego bohatera\n"
+                "5. Usun wybranego bohatera\n");
+        if( scanf("%d", &menu) != 1 || menu < 0 || menu > 5) {
             printf("Blad: Wpisz liczbe odpowiadajaca opcji z menu\n");
             while (getchar() != '\n');
             continue;
@@ -60,8 +62,14 @@ int main(){
             case 3:
                 WyswietlWszystko();
                 break;
+            case 4:
+                Modyfikuj();
+                break;
+            case 5:
+                Usun();
+                break;
             case 0:
-                Generuj(50);
+                Generuj(20);
                 break;
         }
     }
@@ -193,8 +201,59 @@ void Wyszukaj(){
 }
 void Modyfikuj(){
     int wybor;
-    printf("Wpisz Id bohatera ktorego dane chcesz edytowac\n");
-    scanf("%d", &wybor);
+    printf("Wpisz Id bohatera ktorego chcesz usunac (Ilosc bohaterow: %d)\n", iloscB);
+    while(scanf("%d", &wybor) != 1 || wybor > iloscB || wybor < 1){
+        while (getchar() != '\n');
+        printf("Blad: Wpisz prawidlowe Id\n");
+    }
+    Bohater* p;
+    p = head;
+
+    while (p != NULL) {
+        if(p->id == wybor){
+            Wyswietl(p);
+            printf("Co chcesz zmodyfikowac?\n"
+                   "1. Imie\n"
+                   "2. Rase\n"
+                   "3. Klase\n"
+                   "4. Poziom\n"
+                   "5. Reputacje\n"
+                   "6. Status\n");
+            int modyfikacja;
+            while (scanf("%d", &modyfikacja) != 1 || modyfikacja < 1 || modyfikacja > 6){
+                while (getchar() != '\n');
+                printf("Blad: Wpisz liczbe odpowiadajaca opcji z menu\n");
+            }
+            while (getchar() != '\n');
+            switch (modyfikacja)
+            {
+            case 1:
+                printf("Podaj imie\n");
+                fgets(p->imie, sizeof(p->imie), stdin);
+                break;
+            case 2:
+                p->rasa = Wczytaj(1, 4, "Podaj rase 1-4   1(czlowiek) 2(elf) 3(krasnolud) 4(ork)\n") - 1;
+                break;
+            case 3:
+                p->klasa = Wczytaj(1, 6, "Podaj klase 1-6   1(wojownik) 2(mag) 3(kaplan) 4(lotrzyk) 5(lowca) 6(druid)\n") - 1;
+                break;
+            case 4:
+                p->poziom = Wczytaj(1, 99999, "Podaj poziom\n");
+                break;
+            case 5:
+                p->reputacja = Wczytaj(0, 100, "Podaj reputacje 0-100\n");
+                break;
+            case 6:
+                p->status = Wczytaj(1, 5, "Podaj status 1-5   1(aktywny) 2(na misji) 3(ranny) 4(zagniniony) 5(zawieszony)\n") - 1;
+                break;
+            default:
+                printf("Nieprawidlowy wybor\n");
+                break;
+            }
+            return;         
+        }
+        p = p->next;
+    }
 }
 void Usun(){
     int wybor;
@@ -203,14 +262,38 @@ void Usun(){
         while (getchar() != '\n');
         printf("Blad: Wpisz prawidlowe Id\n");
     }
-
     Bohater* p;
     Bohater* poprzedni = NULL;
     p = head;
     
     while (p != NULL) {
         if(p->id == wybor){
-           
+            Wyswietl(p);
+            printf("Czy na pewno chcesz usunac tego bohatera? (1-Tak, 0-Nie)\n");
+            int potwierdzenie;
+            while(scanf("%d", &potwierdzenie) != 1 || (potwierdzenie != 0 && potwierdzenie != 1)){
+                while (getchar() != '\n');
+                printf("Blad: Wpisz 1 lub 0\n");
+            }
+            if (potwierdzenie)
+            {
+                if (poprzedni == NULL) {
+                    head = p->next;
+                } 
+                else {
+                    poprzedni->next = p->next;
+                }
+                Bohater* p2 = p->next;
+                int id = wybor;
+                while (p2 != NULL) {
+                    p2->id = id++;
+                    p2 = p2->next;
+                }
+                free(p);
+                printf("Bohater usuniety pomyslnie\n");
+                iloscB--;
+                return;
+            }       
         }
         poprzedni = p;
         p = p->next;
